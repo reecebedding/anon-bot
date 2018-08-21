@@ -10,18 +10,30 @@ namespace anonbot
         public static void Main(string[] args)
              => new Program().MainAsync().GetAwaiter().GetResult();
 
+        DiscordSocketClient client;
+        string token = "";
+        ulong guildId = 0;
+        ulong textChannel = 0;
+
         public async Task MainAsync()
         {
-            DiscordSocketClient client = new DiscordSocketClient();
+            client = new DiscordSocketClient();
 
             client.Log += Log;
 
-            string token = "";
-
             await client.LoginAsync(TokenType.Bot, token);
+            client.MessageReceived += MessageReceived;
             await client.StartAsync();
 
             await Task.Delay(-1);
+        }
+
+        private async Task MessageReceived(SocketMessage message)
+        {
+            if (message.Channel is IDMChannel)
+            {
+                await client.GetGuild(guildId).GetTextChannel(textChannel).SendMessageAsync(message.Content);
+            }
         }
 
         private Task Log(LogMessage msg)
