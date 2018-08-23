@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.WebSocket;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace anonbot
@@ -32,7 +33,23 @@ namespace anonbot
         {
             if (message.Channel is IDMChannel)
             {
-                await client.GetGuild(guildId).GetTextChannel(textChannel).SendMessageAsync(message.Content);
+                if (message.Attachments.Count > 0)
+                {
+                    foreach (Attachment attachment in message.Attachments.ToList())
+                    {
+                        string imageUrl = attachment.Url;
+
+                        var embed = new EmbedBuilder();
+
+                        embed.WithImageUrl(imageUrl);
+
+                        await client.GetGuild(guildId).GetTextChannel(textChannel).SendMessageAsync(message.Content, false, embed);
+                    }
+                }
+                else
+                {
+                    await client.GetGuild(guildId).GetTextChannel(textChannel).SendMessageAsync(message.Content);
+                }
             }
         }
 
